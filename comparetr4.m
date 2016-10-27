@@ -1,10 +1,14 @@
-function comparetr4(files)
-size(files,1)
+function [idx,result]=comparetr4(files,nm)
+
 for f=1:size(files,1)   
-v(f)=load(files(f,:),'-mat')
+v(f)=load(files(f,:),'-mat');
 end
+
+result=zeros(length(v(1).whisker(1).tracked),4,size(files,1));
+if nm==1
 f1=figure;
 f2=figure;
+end
 colours={'b.-'  'g.-'  'r.-'  'c.-'  'y.-'  'm.-'};
 spr = 4;
 for f=1:length(v)
@@ -49,7 +53,7 @@ for w = 1:length(v(f).whisker)
     
   
 
-
+    if nm==1
     figure(f1)
     h1(1) = subplot(spr,2,1); hold on
     plot(idx,azimuth(idx),colours{wmod}), ylabel('azimuth')
@@ -71,7 +75,7 @@ for w = 1:length(v(f).whisker)
     
 if f==length(v)
     legendCell =cellstr(num2str([1:length(v)]', 'N=%-d'));
-    l1=legend(legendCell,'Location', 'BestOutside')
+    l1=legend(legendCell,'Location', 'BestOutside');
     set(l1,'position',[0.45 0.1 0.1 0.1])
 end
 a = axis;
@@ -120,9 +124,14 @@ a = axis;
     xlabel('twist'), ylabel('elevation')
     title('tangent direction')
     axis square
-    
+    end
 end
+result(:,1,f)=azimuth;
+result(:,2,f)=elevation;
+result(:,3,f)=curv_hc(1,idx);
+result(:,4,f)=curv_hc(2,idx);
 end
+idx=idx';
 clear w
 
 function dBdt = bezierdtval(bez,t)
