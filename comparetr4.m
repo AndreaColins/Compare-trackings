@@ -1,8 +1,20 @@
 function [idx,result]=comparetr4(files,nm)
+%%%%%%%%%%%para cambiar la posicion de inicio del video
+txt=importdata('listofvideos.txt');
+textdata=string(char(txt.textdata));
 
+%%%%%sacar las comas
+textdata=textdata(:,2:end-1)
+%%%%%
 for f=1:size(files,1)   
 v(f)=load(files(f,:),'-mat');
+
+%encontrar la primera frame y gardarla en la estructura v
+
+%dar vuelta los vectores desde la primera frame a la ultima
+ % idx2=circshift(idx,size(idx,1)-315,2)
 end
+size(files,1)  
 
 result=zeros(length(v(1).whisker(1).tracked),4,size(files,1));
 if nm==1
@@ -56,6 +68,7 @@ for w = 1:length(v(f).whisker)
     if nm==1
     figure(f1)
     h1(1) = subplot(spr,2,1); hold on
+   % idx2=circshift(idx,size(idx,1)-315,2)
     plot(idx,azimuth(idx),colours{wmod}), ylabel('azimuth')
     title('azimuth: 90deg is normal to ant-post axis; >90deg for whisker protracted')
     h1(2) = subplot(spr,2,3); hold on
