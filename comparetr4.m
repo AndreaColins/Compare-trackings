@@ -1,8 +1,32 @@
 function [idx,result]=comparetr4(files,nm)
+%%%%%%%%%%%para cambiar la posicion de inicio del video
+txt=importdata('listofvideos.txt');
+textdata=char(txt.textdata);
 
+%%%%%sacar las comas
+textdata=textdata(:,2:end-5);
+%%%%%
 for f=1:size(files,1)   
+    files(f,:)
 v(f)=load(files(f,:),'-mat');
+v(f).whisker.firstframe=1;
+%encontrar la primera frame y gardarla en la estructura v
+i=1;
+
+while i<=size(txt.data,1)
+if strcmp(files(f,strfind(files(f,:),'TT3'):end-4),textdata(i,:))
+   v(f).whisker.firstframe=txt.data(i);
+   txt.data(i)
+  break
+  
 end
+ i=i+1;
+end
+%dar vuelta los vectores desde la primera frame a la ultima
+%idx2=circshift(idx,size(idx,1)-v(f).firstframe,2)
+
+end
+ 
 
 result=zeros(length(v(1).whisker(1).tracked),4,size(files,1));
 if nm==1
@@ -52,26 +76,27 @@ for w = 1:length(v(f).whisker)
     twist(idx) = atan2(-np(2,idx),np(1,idx))*(180/pi);
     
   
-
+    idx2=circshift(idx,size(idx,1)-v(f).whisker.firstframe,2);
     if nm==1
     figure(f1)
     h1(1) = subplot(spr,2,1); hold on
-    plot(idx,azimuth(idx),colours{wmod}), ylabel('azimuth')
+   
+    plot(idx,azimuth(idx2),colours{wmod}), ylabel('azimuth')
     title('azimuth: 90deg is normal to ant-post axis; >90deg for whisker protracted')
     h1(2) = subplot(spr,2,3); hold on
-    plot(idx,elevation(idx),colours{wmod}), ylabel('elevation')
+    plot(idx,elevation(idx2),colours{wmod}), ylabel('elevation')
    
     title('elevation: 90deg is horizontal; >90deg for whisker tip oriented up')
     h1(3) = subplot(spr,2,5); hold on
-    plot(idx,twist(idx),colours{wmod}), ylabel('twist')
+    plot(idx,twist(idx2),colours{wmod}), ylabel('twist')
     title('twist: 90deg is concave down; <90deg for concave posterior')
     
     h2(1) = subplot(spr,2,2); hold on
-    plot(idx,curv_hc(1,idx),colours{wmod}), ylabel('kappa coronal')
+    plot(idx,curv_hc(1,idx2),colours{wmod}), ylabel('kappa coronal')
     h2(2) = subplot(spr,2,4); hold on
-    plot(idx,curv_hc(3,idx),colours{wmod}), ylabel('kappa horizontal')
+    plot(idx,curv_hc(3,idx2),colours{wmod}), ylabel('kappa horizontal')
     h2(3) = subplot(spr,2,6); hold on
-    plot(idx,curv3(idx),colours{wmod}), ylabel('kappa3')
+    plot(idx,curv3(idx2),colours{wmod}), ylabel('kappa3')
     
 if f==length(v)
     legendCell =cellstr(num2str([1:length(v)]', 'N=%-d'));
@@ -126,10 +151,11 @@ a = axis;
     axis square
     end
 end
-result(:,1,f)=azimuth;
-result(:,2,f)=elevation;
-result(:,3,f)=curv_hc(1,idx);
-result(:,4,f)=curv_hc(2,idx);
+
+result(:,1,f)=azimuth(idx2);
+result(:,2,f)=elevation(idx2);
+result(:,3,f)=curv_hc(1,idx2);
+result(:,4,f)=curv_hc(3,idx2);
 end
 idx=idx';
 clear w
