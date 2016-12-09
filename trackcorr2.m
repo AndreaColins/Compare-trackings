@@ -1,13 +1,13 @@
-function v=trackcorr2(files,meanplot)
+function [result,v,power]=trackcorr2(files,meanplot)
 %meanplot=0;
 [idx,result]=comparetr4(files,0);
 %result=[idx,sin(idx*(1/100)+pi/4),sin(idx.*(idx*0.00001+1/100))+rand(size(idx)),sin(idx.*(idx*0.00001+1/100))];
 nfiles=size(files,1);
-acor=zeros(size(xcorr(result(:,:,1)),1),16,nfiles);
+acor=zeros(size(xcov(result(1:end,:,1)),1),16,nfiles);
 
 
 for i=1:nfiles
-[acor(:,:,i),lag]=xcov(result(:,:,i),'coeff');
+[acor(:,:,i),lag]=xcov(result(1:end,:,i),'coeff');
 %[~,idlag(i,:)]=max(abs(acor(:,:,i)));
 end
 v.autoazimuth=squeeze(acor(:,[1],:));
@@ -81,8 +81,8 @@ figure(1)
       
         hold off
        
-        powerspectra3(result,0)
-        %powerspectra2(result,0)
+        power=powerspectra3(result,0)
+        powerspectra2(result,0)
         
 else
   figure(1)
@@ -150,8 +150,8 @@ else
         hold off      
         %%%%%%%%%%%%%%%%%%%%%%%%%power spectrum plot
 
-        %powerspectra2(result,1)
-        powerspectra3(result,1)
+        powerspectra2(result,1)
+        power=powerspectra3(result,1)
 end
 
         

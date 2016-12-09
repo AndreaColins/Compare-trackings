@@ -1,51 +1,55 @@
 function comparefwhh
-conditions=char('air','smooth pole','closed coil', 'open coil');
-conditions(1,:)
-size(conditions,1)
-for i=1:size(conditions,1)
+conditions=char('air','smooth pole','closed coil', 'open coil','black sandpaper','carbon pole');
 
+ncon=size(conditions,1);
+for i=1:size(conditions,1)
+%%%%%%to compare fwhh with gaussing fit use
+%hw=fwhh(conditions(i,:));
 hw=fwhh(conditions(i,:));
 meanhw(i,:)=mean(hw);
 stdhw(i,:)=std(hw);
 end
 %%%%%%%%%%%%%%plot con 4 subplot, uno por cada variable.
 subplot(2,2,1)
-errorbar(1:4,meanhw(:,1),stdhw(:,1),'s')
+errorbar(meanhw(:,1),stdhw(:,1),'s')
 hold on
-axis([0 5 0 700])
-xlab={'Air','Smooth pole','Closed coil', 'Open Coil'};
+axis([0 ncon+1 0 700])
+xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+
  set(gca,...
- 'XTickLabel',xlab,'XTick',[1:4])
+ 'XTickLabel',xlab,'XTick',[1:ncon])
 title('Azimuth')
 hold off
 
 
 subplot(2,2,2)
-errorbar(1:4,meanhw(:,2),stdhw(:,2),'s')
+errorbar(meanhw(:,2),stdhw(:,2),'s')
 hold on
-axis([0 5 0 700])
-xlab={'Air','Smooth pole','Closed coil', 'Open Coil'};
+axis([0 ncon+1 0 700])
+xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
  set(gca,...
- 'XTickLabel',xlab,'XTick',[1:4])
-title('Kappa Coronal')
+ 'XTickLabel',xlab,'XTick',[1:ncon])
+title('Elevation')
 
 hold off
 subplot(2,2,3)
-errorbar(1:4,meanhw(:,3),stdhw(:,3),'s')
+errorbar(meanhw(:,3),stdhw(:,3),'s')
 hold on
-axis([0 5 0 700])
-xlab={'Air','Smooth pole','Closed coil', 'Open Coil'};
+axis([0 ncon+1 0 700])
+xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+
  set(gca,...
- 'XTickLabel',xlab,'XTick',[1:4])
-title('Elevation')
+ 'XTickLabel',xlab,'XTick',[1:ncon])
+title('Kappa Coronal')
 
 subplot(2,2,4)
-errorbar(1:4,meanhw(:,4),stdhw(:,4),'s')
+errorbar(meanhw(:,4),stdhw(:,4),'s')
 hold on
-axis([0 5 0 700])
-xlab={'Air','Smooth pole','Closed coil', 'Open Coil'};
+axis([0 ncon+1 0 400])
+xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+
  set(gca,...
- 'XTickLabel',xlab,'XTick',[1:4])
+ 'XTickLabel',xlab,'XTick',[1:ncon])
 title('Kappa Horizontal')
 hold off
 hold off
