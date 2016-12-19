@@ -141,8 +141,8 @@ set(handles.edit_kinematics_test_position,'String','.5');
 % handles.dir.h = 'X:\Pole\Video data\2016_08_24\TT3\';
 % handles.dir.v = 'X:\Pole\Video data\2016_08_24_cam2\TT3\';
 % for debugging v4b4:
-handles.dir.h =  'C:\Users\mqbpwac5\Documents\MATLAB\videos\2016_09_07\';%TT5_20161004_130702.dat';
-handles.dir.v =  'C:\Users\mqbpwac5\Documents\MATLAB\videos\2016_09_07_cam2\';%TT5_20161004_130615.dat';
+handles.dir.h =  'Z:\Pole\Video data\2016_08_24\TT3\';%TT5_20161004_130702.dat';
+handles.dir.v =  'Z:\Pole\Video data\2016_08_24_cam2\TT3\';%TT5_20161004_130615.dat';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

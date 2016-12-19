@@ -15,7 +15,7 @@ v.autoelevation=squeeze(acor(:,[6],:));
 v.autokcoronal=squeeze(acor(:,[11],:));
 v.autokhorizontal=squeeze(acor(:,[16],:));
 if meanplot==0
-figure(1)
+figure
         
         hold on 
          subplot(4,2,1)
@@ -85,7 +85,7 @@ figure(1)
         powerspectra2(result,0)
         
 else
-  figure(1)
+  figure
         
         hold on 
          subplot(4,2,1)
@@ -100,7 +100,7 @@ else
        subplot(4,2,2)
        % plot(lag,mean(squeeze(acor(:,[1],:)),2),'b')
         shadedErrorBar(lag,mean(squeeze(acor(:,[1],:)),2),std(squeeze(acor(:,[1],:)),0,2),'-b')
-         xlabel('lag')
+         xlabel('lag [msec]')
         ylabel('autocovariance')
         title('Autocovariance azimuth')
         
@@ -114,7 +114,7 @@ else
       subplot(4,2,4)
         shadedErrorBar(lag,mean(squeeze(acor(:,[6],:)),2),std(squeeze(acor(:,[6],:)),0,2),'-g')
         
-         xlabel('lag')
+         xlabel('lag [msec]')
         ylabel('autocovariance')
         title('Autocovariance elevation')
         
@@ -129,7 +129,7 @@ else
       subplot(4,2,6)
        % plot(lag,squeeze(acor(:,[11],:)),'r')
        shadedErrorBar(lag,mean(squeeze(acor(:,[11],:)),2),std(squeeze(acor(:,[11],:)),0,2),'-r')
-         xlabel('lag')
+         xlabel('lag [msec]')
         ylabel('autocovariance')
         title('Autocovariance kappa coronal')
      
@@ -143,7 +143,7 @@ else
         subplot(4,2,8)
         %plot(lag,squeeze(acor(:,[16],:)),'c')
         shadedErrorBar(lag,mean(squeeze(acor(:,[16],:)),2),std(squeeze(acor(:,[16],:)),0,2),'-c')
-         xlabel('lag')
+         xlabel('lag [msec]')
         ylabel('autocovariance')
         title('Autocovariance kappa horizontal')
       

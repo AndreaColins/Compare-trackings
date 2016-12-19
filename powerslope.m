@@ -50,13 +50,13 @@ intercept(i,4)=p(2);
 ysim=p(1)*xdata+p(2);
 rsquared(i,4)=corr(ysim',ydata)^2;
 
-
-plot(xdata,ydata)
-hold on 
-ysim=p(1)*xdata+p(2);
-plot(xdata,ysim)
-hold off
-pause(1)
+% 
+% plot(xdata,ydata)
+% hold on 
+% ysim=p(1)*xdata+p(2);
+% plot(xdata,ysim)
+% hold off
+% pause(1)
 
 end
 rsquared=mean(rsquared);

@@ -22,11 +22,11 @@ hw(i,1)=2.35482*p(2)/sqrt(2);
 ysim=exp(-((xdata-p(1))/p(2)).^2);
 
 rsquared(i,1)=corr(ysim',ydata')^2;
- plot(xdata,ydata,'bo')
- hold on 
- plot(xdata,ysim,'b')
- hold off
- pause(0.5)
+%  plot(xdata,ydata,'bo')
+%  hold on 
+%  plot(xdata,ysim,'b')
+%  hold off
+%  pause(0.5)
 
 
 ydata=v.autoelevation(tin:tfin,i)';
