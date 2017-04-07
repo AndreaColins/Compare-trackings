@@ -1,8 +1,17 @@
 function [result,v,power]=trackcorr2(files,meanplot)
 %meanplot=0;
+
+if ~isempty(findstr(files(1,:),'result'))
+    v=load(files,'-mat');
+    result=v.result;
+    idx=[1:1:size(result,1)];
+    nfiles=size(result,3);
+else
 [idx,result]=comparetr4(files,0);
-%result=[idx,sin(idx*(1/100)+pi/4),sin(idx.*(idx*0.00001+1/100))+rand(size(idx)),sin(idx.*(idx*0.00001+1/100))];
+
 nfiles=size(files,1);
+end
+
 acor=zeros(size(xcov(result(1:end,:,1)),1),16,nfiles);
 
 

@@ -106,10 +106,10 @@ handles.mastervideo_selected = false;   % mastervideo is the horizontal view
 % specify folders in next 2 lines:
 % handles.dir.h = 'X:\Texture_project\2016_04_07\';
 % handles.dir.v = 'X:\Texture_project\2016_04_07_cam2\';
-handles.dir.h = 'C:\Users\Andrea\Documents\MATLAB\Videos\2016_08_12\';
-%handles.dir.h = 'Z:\Pole\Video data\2016_08_24\TT3\';
-handles.dir.v = 'C:\Users\Andrea\Documents\MATLAB\Videos\2016_08_12_cam2\';
-%handles.dir.v = 'Z:\Pole\Video data\2016_08_24_cam2\TT3\';
+handles.dir.h = 'C:\Users\Andrea\Documents\MATLAB\Videos\2016_08_24\';
+%handles.dir.h = 'Z:\Pole\Video data\2016_08_19\TT3\';
+handles.dir.v = 'C:\Users\Andrea\Documents\MATLAB\Videos\2016_08_24_cam2\';
+%handles.dir.v = 'Z:\Pole\Video data\2016_08_19_cam2\TT3\';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 d = handles.dir.h;
@@ -184,7 +184,7 @@ handles.mastervideo_selected = true;
 load(strrep(handles.fname.h,'dat','tr4'),'whisker','roi','calib','trpmtrs','-mat')
 handles.whisker=whisker;
 handles.Nwhiskers = length(whisker);
-handles.calib=calib;
+handles.calib=calib
 guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

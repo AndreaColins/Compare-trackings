@@ -2,15 +2,15 @@ function power=powerspectra3(result,meanplot)
 %%%%%%%%%using multitapper method
 %%%%%%%%%%%%meanplot==0 shows every curve in result
 %%%%%%%%%%%meanplot/=0 shows the mean and standar deviation curve for every variable 
-N = 3488; 
-T = 3.487; %% define time of interval, 3.4 seconds
+N = size(result,1); 
+T = N/1000; %% define time of interval, 3.4 seconds
 t = [0:N-1]/N; 
 t = t*T; 
 f = result; 
 freq =[0:N/2-1]/T; 
 for j=1:size(f,3)
 for i=1:size(f,2)
-    p(:,i,j)=pmtm(f(:,i,j));
+    p(:,i,j)=pmtm(f(:,i,j),4,[],1000);
 %p(:,i,j) = abs(fft(f(:,i,j)))/(N/2); %% absolute value of the fft
 end
 end

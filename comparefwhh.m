@@ -1,5 +1,5 @@
 function comparefwhh
-conditions=char('air','smooth pole','closed coil', 'open coil','black sandpaper','carbon pole');
+conditions=char('air','smooth pole','closed coil', 'open coil','black sandpaper','carbon pole','Bamboo','Toothpick');
 azimuth=[];
 elevation=[];
 kcoronal=[];
@@ -65,8 +65,8 @@ sighorizontal=m(sigidx,1:2)
 subplot(2,2,1)
 errorbar(meanhw(:,1),stdhw(:,1),'s')
 hold on
-axis([0 ncon+1 0 700])
-xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+axis([0 ncon+1 0 400])
+xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon','Bamboo','Toothpick'};
  set(gca,...
  'XTickLabel',xlab,'XTick',[1:ncon])
 title(strcat('Azimuth (p=',num2str(paz,2),')'))
@@ -81,8 +81,8 @@ hold off
 subplot(2,2,2)
 errorbar(meanhw(:,2),stdhw(:,2),'s')
 hold on
-axis([0 ncon+1 0 700])
-xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+axis([0 ncon+1 0 400])
+%xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon',};
  set(gca,...
  'XTickLabel',xlab,'XTick',[1:ncon])
 title(strcat('Elevation (p=',num2str(pel,2),')'))
@@ -95,8 +95,8 @@ hold off
 subplot(2,2,3)
 errorbar(meanhw(:,3),stdhw(:,3),'s')
 hold on
-axis([0 ncon+1 0 700])
-xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+axis([0 ncon+1 0 400])
+%xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
 
  set(gca,...
  'XTickLabel',xlab,'XTick',[1:ncon])
@@ -110,7 +110,7 @@ errorbar(meanhw(:,4),stdhw(:,4),'s')
 hold on
 axis([0 ncon+1 0 400])
 
-xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
+%xlab={'Air','Smooth','Closed', 'Open','Sandpaper','Carbon'};
 
  set(gca,...
  'XTickLabel',xlab,'XTick',[1:ncon])

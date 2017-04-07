@@ -13,7 +13,7 @@ khorizontal2=[];
 
 
 for i=1:size(conditions,1)
-    [slope,intercept]=powerslope2(conditions(i,:));
+    [slope,intercept]=powerslope(conditions(i,:));
     
     %%%%%grupo, de ahi hasta nfiles1+nfiles2 es otro, y asi hasta n
 nfiles=size(slope,1);

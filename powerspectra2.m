@@ -2,16 +2,19 @@ function powerspectra2(result,meanplot)
 %%%%%%%%%%%%using fft
 %%%%%%%%%%%%meanplot==0 shows every curve in result
 %%%%%%%%%%%meanplot/=0 shows the mean and standar deviation curve for every variable 
-N = 3488; 
-T = 3.487; %% define time of interval, 3.4 seconds
+N = size(result,1); 
+T = N/1000; %% define time of interval, 3.4 seconds
 t = [0:N-1]/N; 
 t = t*T; 
 f = result; 
 for j=1:size(f,3)
 for i=1:size(f,2)
     tff=fft(f(:,i,j));
+%     tff2=tff;
+%     threshold = max(abs(tff))/1000; %tolerance threshold
+% tff2(abs(tff)<threshold) = 0;
 power(:,i,j) = abs(tff)/(N/2); %% absolute value of the fft
-phase(:,i,j) = unwrap(angle(tff))*180/pi;
+phase(:,i,j) = mod(unwrap(angle(tff))*180/pi,360);
 end
 end
 phase = phase(1:N/2,:,:);
