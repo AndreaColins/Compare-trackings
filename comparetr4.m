@@ -4,10 +4,11 @@ txt=importdata('listofvideos.txt');
 textdata=char(txt.textdata);
 
 %%%%%sacar las comas
-textdata=textdata(:,2:end-5);
+textdata=textdata(:,1:end-5);
 %%%%%
 for f=1:size(files,1)   
     files(f,:)
+    %correcttr4(files(f,:))
 v(f)=load(files(f,:),'-mat');
 v(f).whisker.firstframe=1;
 %encontrar la primera frame y gardarla en la estructura v
@@ -151,7 +152,12 @@ a = axis;
     axis square
     end
 end
-
+% %%%%nonframe corrected
+%  result(:,1,f)=azimuth(idx);
+%  result(:,2,f)=elevation(idx);
+%  result(:,3,f)=curv_hc(1,idx);
+%  result(:,4,f)=curv_hc(3,idx);
+%%%framecorrected
 result(:,1,f)=azimuth(idx2);
 result(:,2,f)=elevation(idx2);
 result(:,3,f)=curv_hc(1,idx2);
