@@ -3,16 +3,17 @@ function [result,v,power]=trackcorr2(files,meanplot)
 
 if ~isempty(findstr(files(1,:),'result'))
     v=load(files,'-mat');
-    result=v.result;
+    result=diff(diff(v.result,1,1),1,1);
     idx=[1:1:size(result,1)];
     nfiles=size(result,3);
 else
 [idx,result]=comparetr4(files,0);
-
+idx(end-1:end)=[];
+result=diff(diff(result,1,1));
 nfiles=size(files,1);
 end
 
-acor=zeros(size(xcov(result(1:end,:,1)),1),16,nfiles);
+acor=zeros(size(xcov(result(1:end,:,1),'coeff'),1),16,nfiles);
 
 
 for i=1:nfiles

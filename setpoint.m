@@ -1,6 +1,6 @@
 %%%setpoint of <5Hz
 function setpoint 
-pole=char('air','smooth pole','carbon pole', 'black sandpaper', 'closed coil','open coil','Bamboo','Toothpick');
+pole=char('air','Smooth pole','Closed coil', 'Open coil','Black sandpaper','Carbon pole','Toothpick','Bamboo','Wood','Cardboard');
 pole2=pole;
 colors={'b','r','g','k','c','m','y'};
 npole=size(pole,1);
@@ -13,9 +13,11 @@ kcoronal=[];
 khorizontal=[];
 amplitude=[];
 amplitudeair=[];
+phase=[];
+phaseair=[];
 for i=1:npole
     if strcmp(pole(i,1:3),'air')
-        %filename=strcat('./tr4s/processed/FrameCorrected/result',pole(i,:),'.mat');
+        %filename=strcat('./videosselectedtextures/processed/FrameCorrected/result',pole(i,:),'.mat');
         %%%file result(pole)1to5.mat actually has the results for filtered
         %%%data between 0 to 5 for setpoint
         %filename=strcat('./videosselectedtextures/processed/bandpass/upto5/result',pole(i,:),'.mat');
@@ -34,12 +36,13 @@ for i=1:npole
         h1=hilbert(result(:,:,j));
         %[h1,h2]=envelope(result2);
         amplitudeair=[amplitudeair;abs(h1)];
+        phaseair=[phaseair;atan(real(h1)./imag(h1))];
          end
-    end
+    else
 %%%%%%%%%%%%%%%%%%%%this data is already frame corrected
-    %filename=strcat('./tr4s/processed/FrameCorrected/result',pole(i,:),'.mat');
+    %filename=strcat('./videosselectedtextures/processed/FrameCorrected/result',pole(i,:),'.mat');
     %%%data between 0 to 5 for setpoint
-    %filename=strcat('./videosselectedtextures/processed/bandpass/upto5/result',pole(i,:),'1to5.mat');
+    %filename=strcat('./videosselectedtextures/processed/bandpass/upto5/result',pole(i,:),'.mat');
     
     %%%file result(pole)1to5.mat actually has the results for filtered
     %%%data between 0.01 to 5 for hilbert tranform
@@ -62,7 +65,7 @@ for i=1:npole
             startp=find(vtouch.touches,1,'first');
             endp=find(vtouch.touches,1,'last');
             
-            %%%%%%%%%%%%%%%for exploratory periods
+            %%%%%%%%%%%%%%for exploratory periods
             [result,touchperiods]=centredk(endp,vtouch.touches,result);
             if (3488-endp)>=50
                 endp=endp+50;
@@ -85,14 +88,15 @@ for i=1:npole
 %             pause(2)
 %             hold off
             amplitude=[amplitude;abs(h1)];
+            phase=[phase;atan(real(h1)./imag(h1))];
             azimuth=[azimuth;result(:,1)];
             elevation=[elevation;result(:,2)];
             kcoronal=[kcoronal;result(:,3)];
             khorizontal=[khorizontal;result(:,4)];
         end
-
+    end
 end
-subplot(1,2,1)
+subplot(2,2,1)
 [~,edges]=histcounts([azimuth;resultair(:,1)],40);
 hold on
 histogram(resultair(:,1),edges,'Normalization','pdf');
@@ -101,7 +105,7 @@ legend('air','pole')
 xlabel('Angle (\circ)')
 title('Azimuth')
 hold off
-subplot(1,2,2)
+subplot(2,2,2)
 [~,edges]=histcounts([elevation;resultair(:,2)],40);
 hold on
 histogram(resultair(:,2),edges,'Normalization','pdf');
@@ -110,25 +114,25 @@ legend('air','pole')
 xlabel('Angle (\circ)')
 title('Elevation')
 hold off
-% subplot(2,2,3)
-% [~,edges]=histcounts([kcoronal;resultair(:,3)],40);
-% hold on
-% histogram(resultair(:,3),edges,'Normalization','pdf');
-% histogram(kcoronal,edges,'Normalization','pdf');
-% title('Kappa Coronal')
-% legend('air','pole')
-% hold off
-% subplot(2,2,4)
-% [~,edges]=histcounts([khorizontal;resultair(:,4)],40);
-% hold on
-% histogram(resultair(:,4),edges,'Normalization','pdf');
-% histogram(khorizontal,edges,'Normalization','pdf');
-% legend('air','pole')
-% title('Kappa Horizontal')
-% hold off
+subplot(2,2,3)
+[~,edges]=histcounts([kcoronal;resultair(:,3)],40);
+hold on
+histogram(resultair(:,3),edges,'Normalization','pdf');
+histogram(kcoronal,edges,'Normalization','pdf');
+title('Kappa Coronal')
+legend('air','pole')
+hold off
+subplot(2,2,4)
+[~,edges]=histcounts([khorizontal;resultair(:,4)],40);
+hold on
+histogram(resultair(:,4),edges,'Normalization','pdf');
+histogram(khorizontal,edges,'Normalization','pdf');
+legend('air','pole')
+title('Kappa Horizontal')
+hold off
 
 figure
-subplot(1,2,1)
+subplot(2,2,1)
 [~,edges]=histcounts([squeeze(amplitudeair(:,1,:));squeeze(amplitude(:,1,:))],40);
 hold on
 histogram(squeeze(amplitudeair(:,1,:)),edges,'Normalization','pdf');
@@ -136,7 +140,7 @@ histogram(squeeze(amplitude(:,1,:)),edges,'Normalization','pdf');
 legend('air','pole')
 xlabel('Angle (\circ)')
 title('Azimuth')
-subplot(1,2,2)
+subplot(2,2,2)
 [~,edges]=histcounts([squeeze(amplitudeair(:,2,:));squeeze(amplitude(:,2,:))],40);
 hold on
 histogram(squeeze(amplitudeair(:,2,:)),edges,'Normalization','pdf');
@@ -144,19 +148,59 @@ histogram(squeeze(amplitude(:,2,:)),edges,'Normalization','pdf');
 legend('air','pole')
 xlabel('Angle (\circ)')
 title('Elevation')
+subplot(2,2,3)
+[~,edges]=histcounts([squeeze(amplitudeair(:,3,:));squeeze(amplitude(:,3,:))],40);
+hold on
+histogram(squeeze(amplitudeair(:,3,:)),edges,'Normalization','pdf');
+histogram(squeeze(amplitude(:,3,:)),edges,'Normalization','pdf');
+title('Kappa Coronal')
+legend('air','pole')
+subplot(2,2,4)
+[~,edges]=histcounts([squeeze(amplitudeair(:,4,:));squeeze(amplitude(:,4,:))],40);
+hold on
+histogram(squeeze(amplitudeair(:,4,:)),edges,'Normalization','pdf');
+histogram(squeeze(amplitude(:,4,:)),edges,'Normalization','pdf');
+legend('air','pole')
+title('Kappa Horizontal')
+
+figure
+subplot(1,2,1)
+[~,edges]=histcounts([squeeze(phaseair(:,1,:));squeeze(phase(:,1,:))],40);
+hold on
+histogram(squeeze(phaseair(:,1,:)),edges,'Normalization','pdf');
+histogram(squeeze(phase(:,1,:)),edges,'Normalization','pdf');
+legend('air','pole')
+xlabel('Phase')
+title('Azimuth')
+set(gca,'xtick',[-pi/2  0 pi/2])
+set(gca,'xticklabels',{'-\pi/2','0','\pi/2'})
+subplot(1,2,2)
+[~,edges]=histcounts([squeeze(phaseair(:,2,:));squeeze(phase(:,2,:))],40);
+hold on
+histogram(squeeze(phaseair(:,2,:)),edges,'Normalization','pdf');
+histogram(squeeze(phase(:,2,:)),edges,'Normalization','pdf');
+legend('air','pole')
+xlabel('Phase')
+set(gca,'xtick',[-pi/2  0 pi/2])
+set(gca,'xticklabels',{'-\pi/2','0','\pi/2'})
+title('Elevation')
 % subplot(2,2,3)
-% [~,edges]=histcounts([squeeze(amplitudeair(:,3,:));squeeze(amplitude(:,3,:))],40);
+% [~,edges]=histcounts([squeeze(phaseair(:,3,:));squeeze(phase(:,3,:))],40);
 % hold on
-% histogram(squeeze(amplitudeair(:,3,:)),edges,'Normalization','pdf');
-% histogram(squeeze(amplitude(:,3,:)),edges,'Normalization','pdf');
+% histogram(squeeze(phaseair(:,3,:)),edges,'Normalization','pdf');
+% histogram(squeeze(phase(:,3,:)),edges,'Normalization','pdf');
 % title('Kappa Coronal')
 % legend('air','pole')
+% set(gca,'xtick',[-pi/2  0 pi/2])
+% set(gca,'xticklabels',{'-\pi/2','0','\pi/2'})
 % subplot(2,2,4)
-% [~,edges]=histcounts([squeeze(amplitudeair(:,4,:));squeeze(amplitude(:,4,:))],40);
+% [~,edges]=histcounts([squeeze(phaseair(:,4,:));squeeze(phase(:,4,:))],40);
 % hold on
-% histogram(squeeze(amplitudeair(:,4,:)),edges,'Normalization','pdf');
-% histogram(squeeze(amplitude(:,4,:)),edges,'Normalization','pdf');
+% histogram(squeeze(phaseair(:,4,:)),edges,'Normalization','pdf');
+% histogram(squeeze(phase(:,4,:)),edges,'Normalization','pdf');
 % legend('air','pole')
+% % set(gca,'xtick',[-pi/2  0 pi/2])
+% % set(gca,'xticklabels',{'-\pi/2','0','\pi/2'})
 % title('Kappa Horizontal')
 end
 function [result,touchperiods]=centredk(endp,touches,result)

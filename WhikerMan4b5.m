@@ -130,8 +130,8 @@ set(handles.edit_kinematics_test_position,'String','.5');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % specify folders in next 2 lines:
-handles.dir.h =  'C:\Users\mqbpwac5\Documents\MATLAB\videosselectedtextures\Closed coil\horizontal\';
-handles.dir.v =  'C:\Users\mqbpwac5\Documents\MATLAB\videosselectedtextures\Closed coil\vertical\';
+handles.dir.h =  'C:\Users\mqbpwac5\Documents\MATLAB\videosselectedtextures\Carbon Pole\horizontal\';
+handles.dir.v =  'C:\Users\mqbpwac5\Documents\MATLAB\videosselectedtextures\Carbon Pole\vertical\';
 % handles.dir.h =  'Z:\Pole\Video data\2016_08_12\TT3\';
 % handles.dir.v =  'Z:\Pole\Video data\2016_08_12_cam2\TT3\';
 % handles.dir.h =  'C:\Users\mqbpwac5\Documents\MATLAB\videos\2016_08_12\';%TT5_20161004_130702.dat';

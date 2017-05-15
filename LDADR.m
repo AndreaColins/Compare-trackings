@@ -1,8 +1,8 @@
-function [classp,azel]=LDADR
+function [poleclass,azel]=LDADR
 %%%%this version of LDA analyse data in exploratory/touch periods, i.e, and
 %%%%is used to dimensionality reduction in times series may have different lenghts
 
-pole=char('air','Smooth pole', 'Carbon Pole', 'Black Sandpaper', 'Closed coil','Open coil','Cardboard','Bamboo','Toothpick','Wood');
+pole=char('air','Smooth pole');
 %pole=char('air','Smooth pole');
 %pole=char('air','smooth pole', 'carbon pole', 'black sandpaper', 'closed coil','open coil','Bamboo','Toothpick');
 pole2=pole;
@@ -10,8 +10,10 @@ colors={'b','r','g','k','c','m','y'};
 npole=size(pole,1);
 nfiles=zeros(npole,1);
 nresult=zeros(npole,1);
-ms=20;%number of miliseconds
+ms=50;%number of miliseconds
 overlap=0;%miliseconds
+resampleratio=1;
+ms=round(ms/resampleratio);
 poleaz=[];
 poleel=[];
 polekcor=[];
@@ -26,14 +28,18 @@ for i=1:npole
     %filename=strcat('./tr4s/processed/bandpass/from20/result',pole(i,:),'.mat');
     if strcmp(pole(i,1:3),'air')
         v=load(filename,'-mat');
-        result=v.result;
-        nfiles(i)=size(result,3);
+        nfiles(i)=size(v.result,3);
+        for f=1:nfiles(i)
+        result(:,:,f)=resample(v.result(:,:,f),floor(1000/resampleratio),1000);
+        end
+
          nresult(i)=floor(size(result,1)/ms);
     result((nresult(i)*ms+1):end,:,:)=[];
     
     poleaz=reshape(squeeze(result(:,1,:)),nfiles(i).*nresult(i).*ms,1);
     poleaz=reshape(poleaz,ms,nresult(i).*nfiles(i));
-    
+ 
+   
     poleel=reshape(squeeze(result(:,2,:)),nfiles(i).*nresult(i).*ms,1);
     poleel=reshape(poleel,ms,nresult(i).*nfiles(i));
     
@@ -42,7 +48,8 @@ for i=1:npole
     
     polekhor=reshape(squeeze(result(:,4,:)),nfiles(i).*nresult(i).*ms,1);
     polekhor=reshape(polekhor,ms,nresult(i).*nfiles(i));
-        
+    
+    nresult(i)=size(poleaz,2);
     else 
         d=strcat('./videosselectedtextures/processed/touchdetection/',pole(i,:),'/');
         ff = dir([d '*.mat']);
@@ -51,35 +58,49 @@ for i=1:npole
         for j=1:nfiles(i)
             string_list{j}=strcat(d,ff(j).name);
             touchfile=strcat(d,ff(j).name)
+            vtouch=load(touchfile,'-mat');
             v=load(filename,'-mat');
             result=v.result;
-            vtouch=load(touchfile,'-mat');
             idx=[1:3488];
             idx2=circshift(idx,size(idx,1)-vtouch.start_frame-1,2);
-            result=result(idx,:,j);
-            vtouch.touches=vtouch.touches(idx2);
-            %%%%%%%select touch periods
-            startp=find(vtouch.touches,1,'first');
-            endp=find(vtouch.touches,1,'last');
+            touches=vtouch.touches(idx2);
+                find(touches,1,'first')
+                find(touches,1,'last')
+%             plot(find(touches,1,'first'):find(touches,1,'last'),result(find(touches,1,'first'):find(touches,1,'last'),3,j),'o')
+%             hold on
+            result=resample(result(:,:,j),floor(1000/resampleratio),1000);
+            
+            idx=[1:3488/resampleratio];
+            idx2=circshift(idx,size(idx,1)-floor(vtouch.start_frame/resampleratio)-2,2);
 
+           
+            vtouch.touches=round(resample(vtouch.touches,floor(1000/resampleratio),1000));
+
+            vtouch.touches=vtouch.touches(idx2);
+  
+            %%%%%%%select touch periods
+            startp=find(vtouch.touches,1,'first')
+            endp=find(vtouch.touches,1,'last')
+%                 plot(vtouch.touches)
+%                 hold on
+                
             %%%%%%%%%%%%%%%for exploratory periods
-%             [result,touchperiods]=centredk(endp,vtouch.touches,result);
-%             if (3488-endp)>=50
-%                 endp=endp+50;
+            %[result,touchperiods]=centredk(endp,vtouch.touches,result);
+%             if (size(result,1)-endp)>=50/resampleratio
+%                 endp=endp+floor(50/resampleratio);
 %             else
-%                 endp=3488;
+%                 endp=size(result,1);
 %             end
 % 
 %             result=result(startp:endp,:);
-%             
+%             size(result)
+%               plot(startp*2:2:endp*2,result(:,3),'*')
+%                  pause(1)
+
             %%%%%%%%%%%%for touch periods
-             [result,touchperiods]=centredk(endp,vtouch.touches,result);
-             result=touchselection(vtouch.touches,result,touchperiods);
+              %[result,touchperiods]=centredk(endp,vtouch.touches,result);
+             result=touchselection(vtouch.touches,result);
              
-            im=sum(imag(result(:)));
-            if im>0
-                display('Complex numbers found')
-            end
             %%%%%%%%%%%for non touching periods
             %result=notouchselection(vtouch.touches,result);
             
@@ -93,19 +114,9 @@ for i=1:npole
 %             end
             %result=notouchselection(vtouch.touches,result);
             %result=touchselection(vtouch.touches,result);
-%                          hold on
-%                          result=result(startp:endp,:);
-%                          plot(result(:,4),colors{i})
-%                          hold off
-%                          pause(5)
           
-           
-            %resultp=[resultp; result];
-%             plot(resultp(:,1))
-%             pause(2)
-%             clear result
-        %end
-        %result=resultp;
+
+        
             nsamples=floor(size(result,1)/ms);
             nresult(i)=nsamples;
             result((nsamples*ms+1):end,:,:)=[];
@@ -142,6 +153,8 @@ for i=1:npole
         tkhorizontal=polekhor;
         
     else
+        size(tazimuth)
+        size(poleaz)
         tazimuth=[tazimuth,poleaz];
         televation=[televation,poleel];
         tkcoronal=[tkcoronal,polekcor];
@@ -158,10 +171,7 @@ end
 %%
 %%%[Azimuth,Elevation]
 azel=[zscore(tazimuth'),zscore(televation')];
-
-totalfiles=nfiles(1)*nresult(1)
-nresult(1)=totalfiles;
-
+totalfiles=nresult(1)
 poleclass(1:totalfiles)={'air'};
 class1=azel(1:totalfiles,:);
 poleclass(totalfiles+1:size(azel,1))={'pole'};
@@ -169,7 +179,7 @@ class2=azel(totalfiles+1:end,:);
 %%plot
 %%%%%%%%%Raw Data
 size(azel)
-
+figure
 plot(azel(1,:)','b')
 hold on
 plot(azel(nresult(1)+1,:)','r')
@@ -202,7 +212,7 @@ classp=LDA(class1,class2,'[Azimuth,Elevation]');
 % 
 % %%%[Azimuth]
 % azel=[televation'];
-% totalfiles=nfiles(1)*nresult(1)
+% totalfiles=nresult(1)
 % class1=azel(1:totalfiles,:);
 % class2=azel(totalfiles+1:end,:);
 % %%plot
@@ -284,7 +294,7 @@ end
 % hold off
 clear I I2
 end
-function [result]=touchselection(touches,result,touchperiods)
+function [result]=touchselection(touches,result)
 % plot(result(:,4))
 % hold on
 I=find(touches);

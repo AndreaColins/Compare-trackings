@@ -27,7 +27,7 @@ function LDAanalysis
 % figure 
 % scatter(I,Im)
 tic
-final=250;
+final=10;
 ms=10;
 
 obs=[ms:10:final]
@@ -52,7 +52,7 @@ for i=obs
     fileID2 = fopen('classifier.txt','r');
     classifier = fscanf(fileID2,'%f');
     size(classifier)
-    classifier=reshape(classifier,i*2,nrep*10)';
+    classifier=reshape(classifier,i,nrep*10)';
     errorbar(mean(classifier(:,1:end)),std(classifier(:,1:end)))
     hold on
     xlabel('Time [ms]')

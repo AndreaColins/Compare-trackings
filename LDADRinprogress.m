@@ -1,16 +1,19 @@
 function [classp,azel,confusion,nair,npole]=LDADRinprogress
 %%%%this version of LDA analyse data in exploratory/touch periods, i.e, and
 %%%%is used to dimensionality reduction in times series may have different lenghts
-
-pole=char('air','smooth pole','carbon pole', 'black sandpaper', 'closed coil','open coil','Bamboo','Toothpick');
+confusion=[];
+pole=char('air','Open coil','Smooth pole','Wood','Closed coil','Carbon pole','Open coil','Bamboo','Toothpick','Cardboard');
 %pole=char('smooth pole','carbon pole');
 pole2=pole;
 colors={'b','r','g','k','c','m','y'};
 npole=size(pole,1);
 nfiles=zeros(npole,1);
 nresult=zeros(npole,1);
-ms1=10;%number of miliseconds
-overlap=0;%miliseconds
+ms1=40;%number of miliseconds
+
+resampleratio=10;
+ms1=round(ms1/resampleratio);
+overlap=floor(20/resampleratio);%miliseconds
 poleaz=[];
 poleel=[];
 polekcor=[];
@@ -27,8 +30,11 @@ for i=1:npole
     %filename=strcat('./videosselectedtextures/processed/bandpass/from20/result',pole(i,:),'.mat');
     if strcmp(pole(i,1:3),'air')
         v=load(filename,'-mat');
-        result=v.result;
-        nfiles(i)=size(result,3);
+
+        nfiles(i)=size(v.result,3);
+        for f=1:nfiles(i)
+        result(:,:,f)=resample(v.result(:,:,f),floor(1000/resampleratio),1000);
+        end
         ms=ms-overlap;
         nresult(i)=floor(size(result,1)/ms);
         result((nresult(i)*ms+1):end,:,:)=[];
@@ -59,6 +65,8 @@ for i=1:npole
             polekcor=polekcor2;
             polekhor=polekhor2;
         end
+        
+        nresult(i)=size(poleaz,2);
     else 
         d=strcat('./videosselectedtextures/processed/touchdetection/',pole(i,:),'/');
         ff = dir([d '*.mat']);
@@ -66,31 +74,44 @@ for i=1:npole
         string_list=cell(nfiles(i),1);
         for j=1:nfiles(i)
             string_list{j}=strcat(d,ff(j).name);
-            touchfile=strcat(d,ff(j).name);
+            touchfile=strcat(d,ff(j).name)
+            vtouch=load(touchfile,'-mat');
             v=load(filename,'-mat');
             result=v.result;
-            vtouch=load(touchfile,'-mat');
             idx=[1:3488];
             idx2=circshift(idx,size(idx,1)-vtouch.start_frame-1,2);
-            %idx2=circshift(idx,-(size(idx,1)-vtouch.start_frame-1));
-            result=result(idx,:,j);
+            touches=vtouch.touches(idx2);
+            find(touches,1,'first')
+            find(touches,1,'last')
+%             plot(find(touches,1,'first'):find(touches,1,'last'),result(find(touches,1,'first'):find(touches,1,'last'),3,j),'o')
+%             hold on
+            result=resample(result(:,:,j),floor(1000/resampleratio),1000);
+            idx=[1:3488/resampleratio];
+            idx2=circshift(idx,size(idx,1)-floor(vtouch.start_frame/resampleratio)-2,2);
+
+           
+            vtouch.touches=round(resample(vtouch.touches,floor(1000/resampleratio),1000));
+
             vtouch.touches=vtouch.touches(idx2);
+            
             %%%%%%%select touch periods
             startp=find(vtouch.touches,1,'first');
             endp=find(vtouch.touches,1,'last');
 
             %%%%%%%%%%%%%%%for exploratory periods
 %             [result2,touchp]=centredk(endp,vtouch.touches,result);
-%             if (3488-endp)>=50
-%                 endp=endp+50;
+%             if (size(result,1)-endp)>=50/resampleratio
+%                 endp=endp+floor(50/resampleratio);
 %             else
-%                 endp=3488;
-%             end
+%                 endp=size(result,1);
+%             end           
 %             touchp=[startp endp];
-            %result=result2(startp:endp,:);
-%             
+%                  plot(startp*resampleratio:resampleratio:endp*resampleratio,result(startp:endp,3),'*')
+%                   pause(1)
+%             hold off
             %%%%%%%%%%%%for touch periods
              [result2,touchp]=centredk(endp,vtouch.touches,result);
+             
              %discard small touch periods
              counter=1;
              touchperiods=[];
@@ -167,10 +188,8 @@ end
 %%
 %%%[Azimuth,Elevation]
 azel=[tazimuth',televation'];
-
-%size(azel)
-totalfiles=nresult(1)*nfiles(1);
-nresult(1)=totalfiles;
+size(azel)
+totalfiles=nresult(1)
 poleclass(1:totalfiles)={'air'};
 class1=azel(1:totalfiles,:);
 poleclass(totalfiles+1:size(azel,1))={'pole'};
@@ -182,17 +201,17 @@ class2=azel(totalfiles+1:end,:);
 % plot(azel(1,:)','b')
 % hold on
 % plot(azel(nresult(1)+1,:)','r')
-% %plot(azel(1:nresult(1),:)','b')
-% %plot(azel(nresult(1)+1:end,:)','r')
+% plot(azel(1:nresult(1),:)','b')
+% plot(azel(nresult(1)+1:end,:)','r')
 % hold off
 %%%%Apply LDA angles
 %MdlLinear = fitcdiscr(azel,poleclass);
 nair=size(class1,1);
 npole=size(class2,1);
 poleclass=poleclass';
-classp=LDA(azel,poleclass);
-%confusion=crossval2(class1,class2,'[Azimuth,Elevation]',4);
-%misrate=(confusion(1,2)+confusion(2,1))/sum(sum(confusion));
+classp=LDA(azel,poleclass,resampleratio);
+% confusion=crossval2(class1,class2,'[Azimuth,Elevation]',4);
+% misrate=(confusion(1,2)+confusion(2,1))/sum(sum(confusion));
 
 %%%%%%%%%%%debugging
 % test=azel([totalfiles-2:totalfiles+2,5800:5805],:);
@@ -202,12 +221,12 @@ classp=LDA(azel,poleclass);
 %confusion=crossval3(azel,poleclass,test,poleclasstest)
 
 
-% cp = cvpartition(poleclass,'k',10);
-% f=@(xtr,ytr,xtest,ytest)crossval3(xtr,ytr,xtest,ytest);
-% confusion = crossval(f,azel,poleclass,'partition',cp);
-% confusion=reshape(sum(confusion),2,2);
-% misrate=(confusion(1,2)+confusion(2,1))/sum(sum(confusion));
-% classp=0;
+%  cp = cvpartition(poleclass,'k',10);
+%  f=@(xtr,ytr,xtest,ytest)crossval3(xtr,ytr,xtest,ytest);
+%  confusion = crossval(f,azel,poleclass,'partition',cp);
+%  confusion=reshape(sum(confusion),2,2);
+%  misrate=(confusion(1,2)+confusion(2,1))/sum(sum(confusion));
+%  classp=0;
 
  
 
@@ -215,6 +234,7 @@ classp=LDA(azel,poleclass);
 end
 function [result,touchperiods]=centredk(endp,touches,result)
 i=1;
+total=size(result,1);
 touchescopy=touches;
 touchcount=0;
 while i<endp
@@ -222,10 +242,9 @@ while i<endp
     touchescopy(1:ini)=1;
     fin=find(~touchescopy,1,'first')-1;
      if isempty(fin)
-        fin=3488;
+        fin=total;
     end
     touchescopy(1:fin)=0;
-    hold on
     touchperiods(touchcount+1,1:2)=[ini,fin];
     touchcount=touchcount+1;
     i=fin;
@@ -288,7 +307,7 @@ result=result(I,:);
 clear I
 end
 
-function [classp,classifier]=LDA(class,poleclass)
+function [classp,classifier]=LDA(class,poleclass,resampleratio)
 class1=[];
 class2=[];
 for i=1:size(class,1)
@@ -339,9 +358,9 @@ subplot(2,1,1)
 hold on
 histogram(class1p,edges,'Normalization','pdf');
 histogram(class2p,edges,'Normalization','pdf');
-% [~,edges]=hist([class1p';class2p'],20);
-% h1=hist(class1p,edges);
-% h2=hist(class2p,edges);
+[~,edges]=hist([class1p';class2p'],20);
+h1=hist(class1p,edges);
+h2=hist(class2p,edges);
 % bar(h2,'r')
 % hold on
 % bar(h1,'b')
@@ -350,12 +369,13 @@ histogram(class2p,edges,'Normalization','pdf');
 legend('pole','air','Location','best')
 hold off
 subplot(2,1,2)
-plot(V(:,1)./sqrt(sum(V(:,1).^2)),'-*')
+plot(1:resampleratio:size(V,1)*resampleratio,V(:,1),'-*')
 %plot([class1p';class2p'],'-*')
 hold on 
 xlabel('Time [ms]')
+axis([0 size(V,1)*resampleratio -1 1])
 ylabel('First LDA component value')
-hold off
+% hold off
 % subplot(3,1,3)
 % [~,edges]=histcounts(mean([class1;class2],2),20);
 % hold on

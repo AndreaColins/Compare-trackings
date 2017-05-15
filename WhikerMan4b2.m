@@ -125,10 +125,10 @@ handles.mastervideo_selected = false;   % mastervideo is the horizontal view
 % specify folders in next 2 lines:
 % handles.dir.h = 'X:\Texture_project\2016_04_07\';
 % handles.dir.v = 'X:\Texture_project\2016_04_07_cam2\';
-handles.dir.h = 'C:\Users\mqbpwac5\Documents\MATLAB\videos\2016_08_12\';
-handles.dir.v = 'C:\Users\mqbpwac5\Documents\MATLAB\videos\2016_08_12_cam2\';
-% handles.dir.h = 'Z:\Pole\Video data\2016_08_19\TT3\';
-% handles.dir.v = 'Z:\Pole\Video data\2016_08_19_cam2\TT3\';
+handles.dir.h = 'X:\Michaela\230715_shortlist\Movies\';
+handles.dir.v = 'X:\Michaela\230715_shortlist\Movies\';
+ %handles.dir.h = 'Z:\Pole\Video data\2016_08_19\TT3\';
+ %handles.dir.v = 'Z:\Pole\Video data\2016_08_19_cam2\TT3\';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

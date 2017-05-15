@@ -1,11 +1,12 @@
-function PCAlenght
+function [azel,curvatures, poleclass]=PCAlenght
 %%%%this version of PCA analyse data in exploratory/touch periods, i.e,
 %%%%times series may have different lenghts
 
-pole=char('air','Smooth pole', 'Carbon Pole', 'Black Sandpaper','Closed coil','Open coil','Cardboard','Bamboo','Toothpick','Wood');
-%pole=char('Bamboo','Smooth pole');
+pole=char('air','Black Sandpaper','Smooth pole','Wood','Closed coil','Carbon pole','Open coil','Bamboo','Toothpick','Cardboard');
+%pole2=char('Open coil','Smooth pole');
 %pole2=char('Smooth', 'Carbon', 'Sandpaper', 'Closed','Open','Cardboard','Bamboo','Toothpick','Wood');
-pole2=char('Air','Pole');
+%pole2=char('Air','Pole');
+pole2=pole;
 npole=size(pole,1);
 colors=distinguishable_colors(npole);
 nfiles=zeros(npole,1);
@@ -28,7 +29,7 @@ for i=1:npole
     %%%%%%%%%%%%%%%raw data
     filename=strcat('./videosselectedtextures/processed/FrameCorrected/result',pole(i,:),'.mat');
     %%%%%%%%%%%%%%%%%%%%this data is already frame corrected
-    %filename=strcat('./videosselectedtextures/processed/bandpass/from20/result',pole(i,:),'.mat');
+    %filename=strcat('./videosselectedtextures/processed/bandpass/5to20/result',pole(i,:),'.mat');
     if strcmp(pole(i,1:3),'air')
         v=load(filename,'-mat');
         result=v.result;
@@ -63,6 +64,8 @@ for i=1:npole
             polekcor=polekcor2;
             polekhor=polekhor2;
         end
+        
+         nresult(i)=size(poleaz,2);
     else 
         d=strcat('./videosselectedtextures/processed/touchdetection/',pole(i,:),'/');
         ff = dir([d '*.mat']);
@@ -84,13 +87,13 @@ for i=1:npole
             endp=find(vtouch.touches,1,'last');
 
             %%%%%%%%%%%%%%%for exploratory periods
-            [result2,touchp]=centredk(endp,vtouch.touches,result);
-            if (3488-endp)>=50
-                endp=endp+50;
-            else
-                endp=3488;
-            end
-            touchp=[startp endp];
+%             [result2,touchp]=centredk(endp,vtouch.touches,result);
+%             if (3488-endp)>=50
+%                 endp=endp+50;
+%             else
+%                 endp=3488;
+%             end
+%             touchp=[startp endp];
 %             %result=result2(startp:endp,:);
 %             
 %%%%%%%%%for debugging
@@ -110,7 +113,8 @@ for i=1:npole
 %                          hold off
 %                          pause(0.1)
             %%%%%%%%%%%%for touch periods
-            %[result2,touchp]=centredk(endp,vtouch.touches,result);
+            [result2,touchp]=centredk(endp,vtouch.touches,result);
+
             %%%%%%for measuring length of touch and exploratory periods
             lengthtouch=[lengthtouch; touchp(:,2)-touchp(:,1)];
             lengthexpl=[lengthexpl;touchp(end,2)-touchp(1,1)];
@@ -222,23 +226,25 @@ size(SCORE)
 figure
 %%%graficar en los nuevos vectores
 subplot(2,2,1)
-if strcmp(pole(1,1:3),'air')
-    totalfiles=nfiles(1)*nresult(1)
-else
-    totalfiles=nresult(1)
-end
-scatter(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),[],'MarkerEdgeColor',colors(1,:))
+totalfiles=nresult(1)
+poleclass(1:totalfiles)={'air'};
+poleclass(totalfiles+1:size(azel,1))={'pole'};
+scatter3(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),SCORE(1:totalfiles,3),[],'MarkerEdgeColor',colors(1,:))
 %means(1)=mean(mean(azel(1:totalfiles,1:100)));
 for i=2:npole
-hold on
-scatter(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),[],'MarkerEdgeColor',colors(2,:))
+ hold on
+scatter3(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),SCORE(totalfiles+1:(totalfiles+nresult(i)),3),[],'MarkerEdgeColor',colors(i,:))
 %means(i)=mean(mean(azel(totalfiles+1:(totalfiles+nresult(i)),1:100)));
 title('[Azimuth,Elevation]')
 xlabel('First component')
 ylabel('Second component')
-totalfiles=totalfiles+nresult(i);
+totalfiles=totalfiles+nresult(i)
 end
 legend(pole2,'Location','best','Orientation','horizontal') 
+% scatter3(SCORE([531,527],1),SCORE([531,527],2),SCORE([531,527],3),140,'filled','d','MarkerEdgeColor',colors(1,:),'MarkerFaceColor',colors(1,:))
+% scatter3(SCORE(944,1),SCORE(944,2),SCORE(944,3),140,'filled','d','MarkerEdgeColor',colors(2,:),'MarkerFaceColor',colors(2,:))
+% scatter3(SCORE([546,547,548,549,551,552],1),SCORE([546,547,548,549,551,552],2),SCORE([546,547,548,549,551,552],3),140,'filled','d','MarkerEdgeColor',colors(1,:),'MarkerFaceColor',colors(1,:))
+% scatter3(SCORE(1007,1),SCORE(1007,2),SCORE(1007,3),140,'filled','d','MarkerEdgeColor',colors(2,:),'MarkerFaceColor',colors(2,:))
 hold off
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%plot Firsts components
@@ -269,53 +275,7 @@ ylabel('Second Component')
 % set(gca,...
 % 'XTickLabel',xlab,'XTick',[1:size(pole2,1)])
 %hold off
-%%
-%%%%%%%%%%%%%%Apply PCA azimuth and kappa horizontal
-[COEFF, SCORE, LATENT, TSQUARED, EXPLAINED]=pca([zscore(tazimuth'),zscore(tkhorizontal')]);
-%%%%%%%%Plot results
-figure
-%%%graficar en los nuevos vectores
-subplot(2,2,1)
-if strcmp(pole(1,1:3),'air')
-    totalfiles=nfiles(1)*nresult(1)
-else
-    totalfiles=nresult(1)
-end
-scatter(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),[],'MarkerEdgeColor',colors(1,:))
-for i=2:npole
-hold on
-scatter(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),[],'MarkerEdgeColor',colors(i,:))   
-title('[Azimuth, Kappa Horizontal]')
-xlabel('First component')
-ylabel('Second component')
-totalfiles=totalfiles+nresult(i);
-end
-legend(pole2,'Location','best','Orientation','horizontal') 
-hold off
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%plot Firsts components
-subplot(2,2,2)
-plot(COEFF(:,1),'r')
-hold on
-plot(COEFF(:,2),'b')
-legend('First Component','Second Component')
-xlabel('Time [miliseconds]')
-vexplained=EXPLAINED(1)+EXPLAINED(2);
-title(strcat('Variance explained=',num2str(vexplained)))
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%explained variance
-subplot(2,2,3)
-plot(cumsum(EXPLAINED),'*-')
-xlabel('Number of principal component')
-ylabel('Variance explained [%]')
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%scatter of two principal components
-
-subplot(2,2,4)
-scatter(COEFF(:,1),COEFF(:,2))
-xlabel('First Component')
-ylabel('Second Component')
-hold off
 %%
 %%%%%%%%%%%%%%Apply PCA curvatures
 curvatures=[tkhorizontal',tkcoronal'];
@@ -326,11 +286,8 @@ curvatures=[tkhorizontal',tkcoronal'];
 figure
 %%%graficar en los nuevos vectores
 subplot(2,2,1)
-if strcmp(pole(1,1:3),'air')
-    totalfiles=nfiles(1)*nresult(1);
-else
-    totalfiles=nresult(1);
-end
+totalfiles=nresult(1);
+
 scatter(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),[],'MarkerEdgeColor',colors(1,:))
 for i=2:npole
 hold on
@@ -368,21 +325,18 @@ ylabel('Second Component')
 hold off
 
 %%%%%%%%%%%%%%Apply PCA all variables
-%[COEFF, SCORE, LATENT, TSQUARED, EXPLAINED]=pca([(azel-mean(azel(:)))./std(azel(:)),(curvatures-mean(curvatures(:)))./std(curvatures(:))],'Algorithm','eig');
-[COEFF, SCORE, LATENT, TSQUARED, EXPLAINED]=pca([zscore(azel),zscore(curvatures)]);
+[COEFF, SCORE, LATENT, TSQUARED, EXPLAINED]=pca([(azel-mean(azel(:)))./std(azel(:)),(curvatures-mean(curvatures(:)))./std(curvatures(:))]);
+%[COEFF, SCORE, LATENT, TSQUARED, EXPLAINED]=pca([zscore([azel,curvatures])]);
 %%%%%%%%Plot results
 figure
 %%%graficar en los nuevos vectores
 subplot(2,2,1)
-if strcmp(pole(1,1:3),'air')
-    totalfiles=nfiles(1)*nresult(1);
-else
-    totalfiles=nresult(1);
-end
-scatter(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),[],'MarkerEdgeColor',colors(1,:))
+totalfiles=nresult(1);
+
+scatter3(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),SCORE(1:totalfiles,3),[],'MarkerEdgeColor',colors(1,:))
 for i=2:npole
 hold on
-scatter(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),[],'MarkerEdgeColor',colors(i,:))   
+scatter3(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),SCORE(totalfiles+1:(totalfiles+nresult(i)),3),[],'MarkerEdgeColor',colors(i,:))   
 title('[Azimuth, Elevation, Kappa Horizontal, Kappa Coronal]')
 xlabel('First component')
 ylabel('Second component')

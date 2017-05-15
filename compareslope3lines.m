@@ -1,5 +1,6 @@
 function compareslope3lines
-conditions=char('air','Smooth pole','Closed coil', 'Open coil','Black sandpaper','Carbon pole','Toothpick','Bamboo','Wood','Cardboard');
+conditions=char('Smooth pole','Closed coil', 'Open coil','Black sandpaper','Carbon pole','Toothpick','Bamboo','Wood','Cardboard','air');
+colors=distinguishable_colors(size(conditions,1));
 
 azimuth=[];
 elevation=[];
@@ -15,10 +16,10 @@ elevation3=[];
 kcoronal3=[];
 khorizontal3=[];
 for i=1:size(conditions,1)
-    if i==1
-        [slope,slope2,slope3]=powerslopeexploratory2('air');
+    if i==10
+        [slope,slope2,slope3]=powerslopeexploratory2('air',colors(i,:));
     else
-[slope,slope2,slope3]=powerslopeexploratory2(conditions(i,:));
+[slope,slope2,slope3]=powerslopeexploratory2(conditions(i,:),colors(i,:));
         
     end
 

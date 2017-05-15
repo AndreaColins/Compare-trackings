@@ -1,4 +1,4 @@
-function [slope1,slope2,slope3,ydata5]=powerslopeexploratory2(pole)
+function [slope1,slope2,slope3,ydata5]=powerslopeexploratory2(pole,color)
 %%%%%%%%%%Analyse exploratory periods and divide power spectrum in 3 sections and fit to 3 straight lines
 %%%%%%%%%%%%First section: 0-5 Hz
 %%%%%%%%%%%%Second section:5-20 Hz
@@ -27,7 +27,7 @@ if strcmp(pole,'air')
 
     for j=1:nfiles
         result=v.result;
-        result=result(startp:endp,:,j);
+        result=diff(diff(result(startp:endp,:,j),1,1),1,1);
         nresult=floor(size(result,1)/ms)
         result((nresult*ms+1):end,:,:)=[];
         for i=1:nresult
@@ -67,8 +67,7 @@ if strcmp(pole,'air')
             
             rsquared(counter,1)=corr([ysim1';ysim2';ysim3'],[ydata1;ydata2;ydata3])^2;
             
-            plot(xdata,ydata,'r')
-            hold on
+            
             
             
             %%%%%%%%%%%%%%%%%%%%elevation fit
@@ -141,7 +140,8 @@ if strcmp(pole,'air')
             ysim3=p3(1)*xdata3+p3(2);
             
             rsquared(counter,4)=corr([ysim1';ysim2';ysim3'],[ydata1;ydata2;ydata3])^2;
-            
+            plot(exp(xdata),exp(ydata),'Color',color)
+            hold on
             counter=counter+1;
         end
         
@@ -167,7 +167,7 @@ else
         vtouch=load(touchfile,'-mat');
         idx=[1:3488];
         idx2=circshift(idx,size(idx,1)-vtouch.start_frame-1,2);
-        result=result(idx,:,j);
+        result=diff(diff(result(idx,:,j),1,1),1,1);
         vtouch.touches=vtouch.touches(idx2);
         %%%%%%%select touch periods
         startp=find(vtouch.touches,1,'first');
@@ -178,7 +178,7 @@ else
         if (3488-endp)>=50
             endp=endp+50;
         else
-            endp=3488;
+            endp=3486;
         end
         
         
@@ -223,8 +223,8 @@ else
                 
                 rsquared(counter,1)=corr([ysim1';ysim2';ysim3'],[ydata1;ydata2;ydata3])^2;
                 
-                plot(xdata,ydata,'b')
-                hold on
+%                 plot(xdata,ydata,'Color',color)
+%                 hold on
                 %             plot(xdata1,ysim1)
                 %             plot(xdata2,ysim2)
                 %             plot(xdata3,ysim3)
@@ -313,7 +313,8 @@ else
                 ysim3=p3(1)*xdata3+p3(2);
                 
                 rsquared(counter,4)=corr([ysim1';ysim2';ysim3'],[ydata1;ydata2;ydata3])^2;
-                
+                 plot(exp(xdata),exp(ydata),'Color',color)
+                hold on
                 %             plot(xdata,ydata,'b')
                 %             hold on
                 %             plot(xdata1,ysim1)

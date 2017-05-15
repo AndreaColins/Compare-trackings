@@ -2,15 +2,16 @@ function ICAdemo1
 %%%%this version of PCA analyse data in exploratory/touch periods, i.e,
 %%%%times series may have different lenghts
 
-%pole=char( 'Smooth pole', 'Carbon Pole', 'Black Sandpaper','Closed coil','Open coil','Cardboard','Bamboo','Toothpick','Wood');
-pole=char('Black Sandpaper','Carbon Pole','Cardboard');
+pole=char('Smooth pole','Black Sandpaper','Bamboo','Wood','Closed coil','Open coil','Cardboard','Toothpick','Carbon pole');
+%pole=char('Closed coil','Open coil','Cardboard','Toothpick','Carbon pole');
 %pole2=char('Sandpaper','Carbon','Wood','Smooth' , 'Closed','Bamboo','Toothpick','Cardboard','Open');
 pole2=pole;
 npole=size(pole,1);
 colors=distinguishable_colors(npole);
+
 nfiles=zeros(npole,1);
 nresult=zeros(npole,1);
-ms1=400;%number of miliseconds
+ms1=50;%number of miliseconds
 overlap=0;%miliseconds
 poleaz=[];
 poleel=[];
@@ -61,8 +62,8 @@ for i=1:npole
            
             poleaz= poleaz2;
             poleel=poleel2;
-            polekcor=polekcor2;
-            polekhor=polekhor2;
+            polekcor=polekcor2.*0;
+            polekhor=polekhor2.*0;
         end
     else 
         d=strcat('./videosselectedtextures/processed/touchdetection/',pole(i,:),'/');
@@ -85,13 +86,13 @@ for i=1:npole
             endp=find(vtouch.touches,1,'last');
 
             %%%%%%%%%%%%%%%for exploratory periods
-            [result2,touchp]=centredk(endp,vtouch.touches,result);
-            if (3488-endp)>=50
-                endp=endp+50;
-            else
-                endp=3488;
-            end
-            touchp=[startp endp];
+%             [result2,touchp]=centredk(endp,vtouch.touches,result);
+%             if (3488-endp)>=50
+%                 endp=endp+50;
+%             else
+%                 endp=3488;
+%             end
+%             touchp=[startp endp];
             %result=result2(startp:endp,:);
 %             
 %%%%%%%%%for debugging
@@ -111,7 +112,7 @@ for i=1:npole
 %                          hold off
 %                          pause(0.1)
             %%%%%%%%%%%%for touch periods
-            %[result2,touchp]=centredk(endp,vtouch.touches,result);
+            [result2,touchp]=centredk(endp,vtouch.touches,result);
             %%%%%%for measuring length of touch and exploratory periods
             lengthtouch(i)= lengthtouch(i)+sum(touchp(:,2)-touchp(:,1));
             ntouches(i)=ntouches(i)+size(touchp,1);
@@ -176,7 +177,7 @@ for i=1:npole
    
     
     %%%%%%%%%%%%%%%%%%Add new condition
-
+        size(poleaz)
         tazimuth=[tazimuth,poleaz];
         televation=[televation,poleel];
         tkcoronal=[tkcoronal,polekcor];
@@ -213,9 +214,19 @@ end
 % xlabel('Length of exploratory periods [ms]')
 % ylabel('Number of exploratory periods')
 %%
-azel=[televation']';
-%%%%%%%%%Raw Data
+%azel=[zscore([tkhorizontal;tkcoronal]'.*1000+[tazimuth;televation]')];
+curvatures=[tkhorizontal;tkcoronal]';
+curvatures=(curvatures-mean(curvatures(:)))/std(curvatures(:));
 
+azel=[tazimuth;televation]';
+azel=(azel-mean(azel(:)))/std(azel(:));
+azel=[curvatures];
+%%%%%%%%%Raw Data
+% figure
+% subplot(1,2,1)
+% scatter(azel(1:end-1,1),azel(2:end,1),'r')
+% subplot(1,2,2)
+% histogram(azel(:,1),20)
 % plot(azel(1,:)','b')
 % hold on 
 % plot(azel(nresult(1)+1,:)','r')
@@ -228,30 +239,114 @@ azel=[televation']';
 %%
 %%%%Apply PCA angles
 size(azel)
-[ic, Out2, Out3] = fastica(azel', 'numOfIC',3,'firstEig' ,1,'lastEig',10);
+[E, D] = fastica(azel, 'only', 'pca');
+D=sort(diag(D),1,'descend');
+D=cumsum(D)./sum(D);
+NPC=find(D>=0.90,1,'first')
+[ic, A, Out3] = fastica(azel, 'numOfIC',6,'maxNumIterations',1000,'g','tanh','firstEig',1,'lastEig',6,'approach','defl');
 %%%%%%%%Plot results
 figure
 %%%graficar en los nuevos vectores
 subplot(2,2,1)
-plot(azel)
+plot(ic(1:end,:)')
+hold on 
+legend('IC 1','IC 2','IC 3','IC 4','IC 5','IC 6')
+hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%plot Firsts components
 subplot(2,2,2)
-plot(ic(1:3,:)')
+SCORE=ic*azel';
+SCORE=SCORE';
+if strcmp(pole(1,1:3),'air')
+    totalfiles=nfiles(1)*nresult(1);
+else
+    totalfiles=nresult(1);
+end
+scatter3(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),SCORE(1:totalfiles,3),[],'MarkerEdgeColor',colors(1,:))
+for i=2:npole
+hold on
+scatter3(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),SCORE(totalfiles+1:(totalfiles+nresult(i)),3),[],'MarkerEdgeColor',colors(i,:))
+%means(i)=mean(mean(azel(totalfiles+1:(totalfiles+nresult(i)),1:100)));
+title('[Azimuth,Elevation]')
+xlabel('First component')
+ylabel('Second component')
+zlabel('Third component')
+totalfiles=totalfiles+nresult(i);
+end
+legend(pole2,'Location','best','Orientation','horizontal') 
+hold off
 
 %%%%%%%%%%%%%%%%%%%%%%%%projected points
 subplot(2,2,3)
-SCORE=ic*azel;
-SCORE=SCORE';
+if strcmp(pole(1,1:3),'air')
+    totalfiles=nfiles(1)*nresult(1);
+else
+    totalfiles=nresult(1);
+end
+scatter3(SCORE(1:totalfiles,4),SCORE(1:totalfiles,5),SCORE(1:totalfiles,6),[],'MarkerEdgeColor',colors(1,:))
+for i=2:npole
+hold on
+scatter3(SCORE(totalfiles+1:(totalfiles+nresult(i)),4),SCORE(totalfiles+1:(totalfiles+nresult(i)),5),SCORE(totalfiles+1:(totalfiles+nresult(i)),6),[],'MarkerEdgeColor',colors(i,:))
+%means(i)=mean(mean(azel(totalfiles+1:(totalfiles+nresult(i)),1:100)));
+title('[Azimuth,Elevation]')
+xlabel('Fourth component')
+ylabel('Fifth component')
+zlabel('Sixth component')
+totalfiles=totalfiles+nresult(i);
+end
+legend(pole2,'Location','best','Orientation','horizontal') 
+hold off
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%scatter of two principal components
+% subplot(2,2,4)
+% plot(azel')
+
+%%%%%%%%%%%%%%%%%%%%%%%%histogram of A coefficients
+% if strcmp(pole(1,1:3),'air')
+%     totalfiles=nfiles(1)*nresult(1);
+% else
+%     totalfiles=nresult(1);
+% end
+% [~,edges]=histcounts(reshape(A,size(A,1)*size(A,2),1),20);
+% hold on
+% histogram(reshape(A,size(A,1)*size(A,2),1),edges,'Normalization','pdf');
+% hold off
+
+%%
+% figure
+% subplot(5,5,1)
+% if strcmp(pole(1,1:3),'air')
+%     totalfiles=nfiles(1)*nresult(1);
+% else
+%     totalfiles=nresult(1);
+% end
+% scatter(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),[],'MarkerEdgeColor',colors(1,:))
+% for i=2:npole
+% hold on
+% scatter(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),[],'MarkerEdgeColor',colors(2,:))
+% %means(i)=mean(mean(azel(totalfiles+1:(totalfiles+nresult(i)),1:100)));
+% title('[Azimuth,Elevation]')
+% xlabel('Fourth component')
+% ylabel('Fifth component')
+% zlabel('Sixth component')
+% totalfiles=totalfiles+nresult(i);
+% end
+
+[COEFF, SCORE2, LATENT, TSQUARED, EXPLAINED]=pca(SCORE);
+size(SCORE2)
+%%%%%%%%Plot results
+figure
+%%%graficar en los nuevos vectores
 if strcmp(pole(1,1:3),'air')
     totalfiles=nfiles(1)*nresult(1)
 else
     totalfiles=nresult(1)
 end
-scatter3(SCORE(1:totalfiles,1),SCORE(1:totalfiles,2),SCORE(1:totalfiles,3),[],'MarkerEdgeColor',colors(1,:))
-
+scatter(SCORE2(1:totalfiles,1),SCORE2(1:totalfiles,2),[],'MarkerEdgeColor',colors(1,:))
+%means(1)=mean(mean(azel(1:totalfiles,1:100)));
 for i=2:npole
 hold on
-scatter(SCORE(totalfiles+1:(totalfiles+nresult(i)),1),SCORE(totalfiles+1:(totalfiles+nresult(i)),2),[],'MarkerEdgeColor',colors(i,:))
+scatter(SCORE2(totalfiles+1:(totalfiles+nresult(i)),1),SCORE2(totalfiles+1:(totalfiles+nresult(i)),2),[],'MarkerEdgeColor',colors(i,:))
 %means(i)=mean(mean(azel(totalfiles+1:(totalfiles+nresult(i)),1:100)));
 title('[Azimuth,Elevation]')
 xlabel('First component')
@@ -260,15 +355,209 @@ totalfiles=totalfiles+nresult(i);
 end
 legend(pole2,'Location','best','Orientation','horizontal') 
 hold off
+%%%%%%%%%%%%%%%%%%%%LDA
+% totalfiles=nresult(1)*nfiles(1);
+% nresult(1)=totalfiles;
+% poleclass(1:totalfiles)={'air'};
+% class1=SCORE(1:totalfiles,:);
+% poleclass(totalfiles+1:size(azel,1))={'pole'};
+% class2=SCORE(totalfiles+1:end,:);
+% poleclass=poleclass';
+% nresult
+% size(poleclass)
+% size(SCORE)
+% classp=LDA(SCORE,poleclass);
+% nresult
+LDA2(SCORE,'[Azimuth,Elevation,Kappa Horizontal, Kappa Coronal]',pole,nresult);
+end
+function classp=LDA2(data,titlevar,classes,nresult)
+totalfiles=nresult;
+means=ones(size(data,2),size(nresult,1));
+S_classes=means;
+means(:,1)=mean(data(1:nresult(1),:))';
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%scatter of two principal components
+S_classes=cov(data(1:nresult(1),:));
+for i=2:size(nresult,1)
+    means(:,i)=mean(data(totalfiles+1:nresult(i)+totalfiles,:))';
+    S_classes=S_classes+cov(data(totalfiles+1:nresult(i)+totalfiles,:));
+    totalfiles=totalfiles+nresult(i);
+end   
 
-subplot(2,2,4)
-scatter(ic(1,:),ic(2,:))
-%%
+mo=mean(data)';
+S_w=S_classes;
+%S_w1=inv(S_w);
 
+%S_b=((m1-mo)*(m1-mo)'+(m2-mo)*(m2-mo)'+(m3-mo)*(m3-mo)')/3;
+S_b=zeros(size(S_w));
+for i=1:size(nresult,1)
+    S_b=S_b+nresult(i).*(means(:,i)-mo)*(means(:,i)-mo)';
+    
+end
+S_b=S_b./size(nresult,1);
+A=S_w\S_b;
+[V,D]=eig(A);
+sample=A*V-V*D;
+
+D=diag(D);
+[Dsort,idx]=sort(D,'descend');
+
+%sort the corresponding eigenvectors
+Vsort=zeros(size(V));
+
+for i=1:size(V,2)
+    Vsort(:,i)=V(:,idx(i));
 end
 
+V=real(Vsort);
+
+classp=V(:,1)'*data';
+classp2=V(:,2)'*data';
+classp3=V(:,3)'*data';
+colors=distinguishable_colors(size(nresult,1));
+figure
+subplot(1,3,1)
+scatter3(classp(1:nresult(1)),classp2(1:nresult(1)),classp3(1:nresult(1)),[],'MarkerEdgeColor',colors(1,:))
+totalfiles=nresult(1);
+for i=2:size(nresult,1)
+    hold on
+scatter3(classp(totalfiles+1:(totalfiles+nresult(i))),classp2(totalfiles+1:(totalfiles+nresult(i))),classp3(totalfiles+1:(totalfiles+nresult(i))),[],'MarkerEdgeColor',colors(i,:))   
+%title('[Azimuth, Kappa Horizontal]')
+xlabel('First LDA')
+ylabel('Second LDA')
+title(titlevar)
+totalfiles=totalfiles+nresult(i);
+
+end
+legend(classes,'Location','best')%,'Orientation','horizontal') 
+hold off
+
+subplot(1,3,2)
+Dsort=real(Dsort);
+EXPLAINED=Dsort/sum(Dsort)*100;
+plot(cumsum(EXPLAINED),'*-')
+xlabel('Number of LDA Component')
+ylabel('Eigenvalue [%]')
+
+subplot(1,3,3)
+plot(V(:,1),'-*')
+hold on 
+xlabel('Time [ms]')
+ylabel('First LDA component value')
+hold off
+%subplot(2,2,4)
+% [~,edges]=histcounts(data,200);
+% hold on
+% histogram(data(1:nresult(1),:),edges,'Normalization','pdf')
+% totalfiles=nresult(1);
+% hold on
+% for i=2:size(nresult,1)
+%     histogram(data(totalfiles+1:nresult(i)+totalfiles,:),edges,'Normalization','pdf');
+%     totalfiles=totalfiles+nresult(i);
+% end   
+% title(titlevar)
+% %xlabel('Elevation')
+% legend(classes,'Location','best')
+% hold off
+% [~,edges]=histcounts([classp],200);
+% hold on
+% histogram(classp(1:nresult(1)),edges,'Normalization','pdf')
+% totalfiles=nresult(1);
+% hold on
+% for i=2:size(nresult,1)
+%     histogram(classp(totalfiles+1:nresult(i)+totalfiles),edges,'Normalization','pdf');
+%     totalfiles=totalfiles+nresult(i);
+% end   
+% title(titlevar)
+% xlabel('First LDA Component')
+% legend(classes,'Location','best')
+% hold off
+end
+function [classp,classifier]=LDA(class,poleclass)
+class1=[];
+class2=[];
+for i=1:size(class,1)
+    if strcmp(poleclass(i,:),'air')
+        class1=[class1;class(i,:)];
+    else
+        class2=[class2;class(i,:)];
+    end
+end
+m1=mean(class1)';
+m2=mean(class2)';
+S_1=cov(class1);
+S_2=cov(class2);
+S_w=S_1+S_2;
+%S_w1=inv(S_w);
+S_b=(m1-m2)*(m1-m2)';
+A=S_w\S_b;
+
+[V,D]=eig(A);
+sample=A*V-V*D;
+sample(1,1);
+D=diag(D);
+[Dsort,idx]=sort(D,'descend');
+
+
+%sort the corresponding eigenvectors
+Vsort=zeros(size(V));
+
+for i=1:size(V,1)
+    Vsort(:,i)=V(:,idx(i));
+end
+V=Vsort;
+clear Vsort;
+V(:,1)=real(V(:,1));
+
+class1p=V(:,1)'*class1';
+class2p=V(:,1)'*class2';
+
+% figure
+% plot(class1p)
+% hold on
+% plot(class2p,'r')
+% hold off
+
+figure
+subplot(2,1,1)
+[~,edges]=histcounts([class1p';class2p'],20);
+hold on
+histogram(class1p,edges,'Normalization','pdf');
+histogram(class2p,edges,'Normalization','pdf');
+% [~,edges]=hist([class1p';class2p'],20);
+% h1=hist(class1p,edges);
+% h2=hist(class2p,edges);
+% bar(h2,'r')
+% hold on
+% bar(h1,'b')
+
+%title(titlevar)
+legend('pole','air','Location','best')
+hold off
+subplot(2,1,2)
+plot(V(:,1)./sqrt(sum(V(:,1).^2)),'-*')
+%plot([class1p';class2p'],'-*')
+hold on 
+xlabel('Time [ms]')
+ylabel('First LDA component value')
+hold off
+% subplot(3,1,3)
+% [~,edges]=histcounts(mean([class1;class2],2),20);
+% hold on
+% histogram(mean(class1,2),edges,'Normalization','pdf');
+% histogram(mean(class2,2),edges,'Normalization','pdf');
+% [~,edges]=hist([class1p';class2p'],20);
+% h1=hist(class1p,edges);
+% h2=hist(class2p,edges);
+% bar(h2,'r')
+% hold on
+% bar(h1,'b')
+
+%title(titlevar)
+%legend('pole','air','Location','best')
+%hold off
+classp=[class1p';class2p'];
+classifier=real(V(:,1));
+end
 function [result,touchperiods]=centredk(endp,touches,result)
 i=1;
 touchescopy=touches;

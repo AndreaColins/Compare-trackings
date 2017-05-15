@@ -77,7 +77,7 @@ for w = 1:length(v(f).whisker)
     twist(idx) = atan2(-np(2,idx),np(1,idx))*(180/pi);
     
   
-    idx2=circshift(idx,size(idx,1)-v(f).whisker.firstframe,2);
+    idx2=circshift(idx,size(idx,1)-v(f).whisker.firstframe,2)
     if nm==1
     figure(f1)
     h1(1) = subplot(spr,2,1); hold on

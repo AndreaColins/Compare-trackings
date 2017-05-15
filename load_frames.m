@@ -63,11 +63,17 @@ while(~stop)
         %         writeVideo(mov,img); % AE
         %         aviobj = addframe(aviobj,img);
          
-         if count>=data.startframe
-             %imagesc(img);
-        %pause(0.001)
-        writeVideo(mp4obj,img);
-         end
+        if count>=data.startframe
+            imagesc(img)
+            hold on
+            plot([300:50:400],[300:50:400],'*r')
+            hold off
+            pause(0.01)
+            frame = getframe(1);
+            im = frame2im(frame);
+            writeVideo(mp4obj,im);
+           
+        end
     end
     
     
